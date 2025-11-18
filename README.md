@@ -1,25 +1,34 @@
 # Setting
 
-Don't you love having phone calls from a calling center? Imagine working for one – as a manager! You have too many ~~victims~~ customers too choose from each day so you need to prioritize. That's where we come in, we will provide an API given each customer a success score for how likely the call will succeed into a subscription to a loan (Have I forgotten to mention that you are also working for a bank?), helping to prioritize your precious workers efforts.
+Don’t you just love getting calls from a call centre? Now imagine working for one — as the manager! Each day you have far too many victims customers to choose from, so you need to prioritise. That’s where we come in.
 
-# 1. Problem description
+We provide an API that assigns every customer a “success score” estimating how likely they are to convert a call into a shiny new bank loan (oh — did we forget to mention you also work for a bank?). This helps you direct your valued employees’ efforts where they matter most.
+
+# 1. Problem Description
 
 The data is from 
 >[Moro et al., 2014] S. Moro, P. Cortez and P. Rita. A Data-Driven Approach to Predict the Success of Bank Telemarketing. Decision Support Systems, In press, http://dx.doi.org/10.1016/j.dss.2014.03.001
 
-We use it to select features and train a binary classification model, which then can be queried from the Telemarketing team to rank the success likelihood of their next client calls. So we are not looking for a yes/no decision but a score for ranking the customers success rate.
+We use it to select features and train a binary classification model. The Telemarketing team can then query this model to rank customers by likelihood of success. We are not making a hard yes/no prediction — we want a score suitable for ranking.
 
-The workflow is like this
+The workflow looks like this:
 ```
-eda + feature selection -> finetuning logistic regression model and random tree model -> exporting best model to trainings script and pickle it -> create deployment script -> put it into a container -> publish contaier -> setup cloud-interface
+EDA + feature selection 
+→ fine-tuning logistic regression and random forest models
+→ export best model to training script and pickle it
+→ create deployment script
+→ build & publish container
+→ set up cloud interface
+
 ```
 
 # 2. Data Description
 
-The data is in 📁 `data`.
-Here is an excerpt of `data/bank-additional-names.txt` for shorts descriptions of the 20 features:
+All data is in 📁 `data`.
 
-- bank client data:
+An excerpt from `data/bank-additional-names.txt` provides short descriptions of the 20 features:
+
+- **Bank Client Data**:
 
     1. age : age of client (numeric)
     2. job : type of job (categorical)
@@ -29,14 +38,14 @@ Here is an excerpt of `data/bank-additional-names.txt` for shorts descriptions o
     6. housing: has housing loan? (categorical)
     7. loan: has personal loan? (categorical)
 
-- related with the last contact of the current campaign:
+- **Last contact of the current campaign**:
 
     8. contact: contact communication type (categorical) 
     9. month: last contact month of year (categorical)
     10. day_of_week: last contact day of the week (categorical)
     11. duration: last contact duration, in seconds (numeric)
 
-- other attributes:
+- **Other attributes**:
 
     12. campaign: number of contacts performed during this campaign and for this client (numeric, includes last contact)
     13. pdays: number of days that passed by after the client was last contacted from a previous campaign (numeric; 999 means client was not previously contacted)
@@ -44,7 +53,7 @@ Here is an excerpt of `data/bank-additional-names.txt` for shorts descriptions o
     15. poutcome: outcome of the previous marketing campaign (categorical)
 
 
-- social and economic context attributes
+- **Social and economic context**:
 
     16. emp.var.rate: employment variation rate - quarterly indicator (numeric)
     17. cons.price.idx: consumer price index - monthly indicator (numeric)     
@@ -52,47 +61,58 @@ Here is an excerpt of `data/bank-additional-names.txt` for shorts descriptions o
     19. euribor3m: euribor 3 month rate - daily indicator (numeric)
     20. nr.employed: number of employees - quarterly indicator (numeric)
 
-> ⚠️ **Important:** For the API call the features related with the last contact `contact`, `month`, `day_of_week`, and `duration` are for the call that is about to be made. However, the duration is not known before a call is performed. Thus, this input has to be discarded if the intention is to have a realistic predictive model.
+> ⚠️ **Important**: For API calls, the “last contact” features (`contact`, `month`, `day_of_week`, `duration`) refer to the call _about to be made_. Since `duration` is obviously unknown before the call, it must be omitted in a predictive model.
 
 # 3. EDA Summary
 
-The data itself looks solid. There are no missing values or strange values for categorical features.
+The dataset is generally clean: no missing values and no strange categories.
 
-Except one inconsitency with `pdays`. It should be 999 when `poutcome` has the value nonexistent, but there are some rows which contradict this. In the end it doesn't affect the auc-roc scores.
+There is one inconsistency with `pdays`: its value should be `999` whenever `poutcome` is `nonexistent`, but several rows contradict this. This has no practical impact on AUC-ROC performance.
 
-Also after a greedy feature selection (or rather removal) we will use only these 7 features for training:
-`cons.price.idx`,`contact`,`emp.var.rate`,`euribor3m`,`month`,`pdays`,`previous`
+After a greedy feature-removal process, we retain the following seven features for training:
+`cons.price.idx`, `contact`, `emp.var.rate`, `euribor3m`, `month`, `pdays`, `previous`.
 
-# 4. Modeling approach & metrics
+# 4. Modelling Approach & Metrics
 
-We KISS the metric and use the simple auc-roc score for comparing model performance.
+We keep the metric simple (KISS!) and use AUC-ROC to compare model performance.
 
-We do finetuning runs for linear regression models and also for a random forest. The winner is random forest.
+We fine-tune both logistic regression and random forest models.
+Random forest wins.
 
 # 5. How to run
 
-The dependencies are managed via `uv`. How you install uv is up to you. I have installed it as a global packet manager, but it can also be installed in a virtual environment somehow, but I don't know the details.
+Dependencies are managed with `uv`.
 
-To run the `notebook.ipynb` you have to install all dependencies via
+> _Note_: All commands below assume you are in the project root.
+
+First, create a virtual environment:
+```bash
+uv venv
+```
+To install all dependencies (e.g., for running notebook.ipynb):
+
 ```bash
 uv sync
 ```
-### Running `train_pipeline.py`
-To run the exported training script `train_pipeline.py` you have to run
+
+(I run Jupyter notebooks locally in VS Code and simply select the .venv Python kernel. I don't know about other setups.)
+
+
+### Run the final Training
 ```bash
 uv run train_pipeline.py
 ```
-This creates a pickled `pipeline_v1.bin` (it's also included in this repository, so running the previous file is not mandatory for deployment)
+This produces a pickled model: `pipeline_v1.bin`  
+(already included in the repo, so re-training is not required for deployment).
 
-### Run server locally
-To run deployment just run
+### Running the Server Locally
 ```bash
-uvicorn server:app --port 8000
+uv run uvicorn server:app --port 8000
 ```
 
-### Run server in Docker
+### Running the Server in Docker
 
-To run the server in docker you either have to build the dockerfile or download the prebuild file from my repository.
+You can either build the Docker image yourself or pull the prebuilt version.
 
 #### A. Build locally
 
@@ -100,40 +120,42 @@ To run the server in docker you either have to build the dockerfile or download 
 docker build -t julxi/ml-zoomcamp-midterm:2025 .
 ```
 
-#### B. Download from repository
+#### B. Pull from repository
 
 ```bash
 docker pull julxi/ml-zoomcamp-midterm:2025
 ```
 
-#### Running the docker image
+#### Running the Docker image
 
-Make sure that you have downloaded or build the docker image. You should see something like this.
+Check that the image is available:
 ```bash
-jx@hope:~/projects/machine-learning-zoomcamp-2025-midterm$ docker images
-REPOSITORY                  TAG       IMAGE ID       CREATED        SIZE
-julxi/ml-zoomcamp-midterm   2025      4fe632388077   6 hours ago    432MB
+docker images
 ```
 
-Then you can run the image like this
+You should see something along these lines:
+```bash
+REPOSITORY                  TAG     IMAGE ID       CREATED        SIZE
+julxi/ml-zoomcamp-midterm   2025    4fe632388077   6 hours ago    432MB
+```
 
+Run the container:
 ```bash
 docker run -p 9696:9696 julxi/ml-zoomcamp-midterm:2025
-
 ```
 
-# 6. API usage example
+# 6. API Usage Example
 
-These scripts assume that you run the server or docker image on the ports given as above.
+These examples assume the server or Docker container is running on the ports shown above.
 
-Example api call for the server
+### Server (port 8000)
 ```bash
 curl -X POST "http://localhost:8000/predict" \
      -H "Content-Type: application/json" \
      -d '{"cons.price.idx": 93.918, "contact": "cellular", "emp.var.rate": 1.4, "euribor3m": 4.957, "month": "jul", "pdays": 999, "previous": 0}'
 ```
 
-For the runnig docker container
+### Docker container (port 9696)
 ```bash
 curl -X POST "http://localhost:9696/predict" \
      -H "Content-Type: application/json" \
