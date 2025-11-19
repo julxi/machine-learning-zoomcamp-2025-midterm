@@ -89,7 +89,8 @@ First, create a virtual environment:
 ```bash
 uv venv
 ```
-To install all dependencies (e.g., for running notebook.ipynb):
+
+To run 🗒️ `notebook.ipynb` locally you need to install all dependencies (e.g., for running notebook.ipynb):
 
 ```bash
 uv sync
