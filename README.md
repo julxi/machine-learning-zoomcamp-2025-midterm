@@ -161,3 +161,5 @@ curl -X POST "http://localhost:9696/predict" \
      -H "Content-Type: application/json" \
      -d '{"cons.price.idx": 93.918, "contact": "cellular", "emp.var.rate": 1.4, "euribor3m": 4.957, "month": "jul", "pdays": 999, "previous": 0}'
 ```
+
+## 7. Known limitations / next steps
