@@ -17,31 +17,41 @@ df[TARGET] = df[TARGET].map({"yes": 1, "no": 0})
 df_train, df_test = train_test_split(df, test_size=0.2, random_state=SEED)
 y_train = df_train.pop(TARGET)
 
-mini_features = [
+SELECTED_FEATURES = [
+    "nr.employed",
+    "job",
+    "age",
+    "loan",
+    "cons.conf.idx",
+    "campaign",
+    "euribor3m",
+    "previous",
     "cons.price.idx",
     "contact",
-    "emp.var.rate",
-    "euribor3m",
-    "month",
     "pdays",
-    "previous",
+    "month",
+    "emp.var.rate",
 ]
 
-train_dict = df_train[mini_features].to_dict(orient="records")
+rf_best_params = {
+    "bootstrap": False,
+    "class_weight": "balanced",
+    "max_depth": 12,
+    "max_features": "log2",
+    "min_samples_leaf": 4,
+    "min_samples_split": 16,
+    "n_estimators": 494,
+}
+
+train_dict = df_train[SELECTED_FEATURES].to_dict(orient="records")
 
 pipeline = make_pipeline(
     DictVectorizer(sparse=False),
     StandardScaler(),
     RandomForestClassifier(
+        **rf_best_params,
         random_state=SEED,
         n_jobs=-1,
-        bootstrap=True,
-        class_weight="balanced",
-        max_depth=8,
-        max_features=0.5,
-        min_samples_leaf=12,
-        min_samples_split=13,
-        n_estimators=439,
     ),
 )
 
@@ -51,7 +61,7 @@ pipeline.fit(train_dict, y_train)
 
 # evaluate
 y_test = df_test.pop(TARGET)
-test_dict = df_test[mini_features].to_dict(orient="records")
+test_dict = df_test[SELECTED_FEATURES].to_dict(orient="records")
 y_test_prob = pipeline.predict_proba(test_dict)[:, 1]
 test_auc = roc_auc_score(y_test, y_test_prob)
 

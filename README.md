@@ -150,17 +150,58 @@ docker run -p 9696:9696 julxi/ml-zoomcamp-midterm:2025
 These examples assume the server or Docker container is running on the ports shown above.
 
 ### Server (port 8000)
+
+#### Health
+```bash
+curl -X GET "http://localhost:8000/health"
+```
+
+#### Predict
 ```bash
 curl -X POST "http://localhost:8000/predict" \
      -H "Content-Type: application/json" \
-     -d '{"cons.price.idx": 93.918, "contact": "cellular", "emp.var.rate": 1.4, "euribor3m": 4.957, "month": "jul", "pdays": 999, "previous": 0}'
+     -d '{
+           "nr.employed": 5008.7,
+           "job": "admin.",
+           "age": 29,
+           "loan": "no",
+           "cons.conf.idx": -40.0,
+           "campaign": 1,
+           "euribor3m": 0.683,
+           "previous": 3,
+           "cons.price.idx": 93.876,
+           "contact": "cellular",
+           "pdays": 3,
+           "month": "may",
+           "emp.var.rate": -1.8
+         }'
 ```
 
 ### Docker container (port 9696)
+#### Health
+```bash
+curl -X GET "http://localhost:9696/health"
+```
+
+#### Predict
 ```bash
 curl -X POST "http://localhost:9696/predict" \
      -H "Content-Type: application/json" \
-     -d '{"cons.price.idx": 93.918, "contact": "cellular", "emp.var.rate": 1.4, "euribor3m": 4.957, "month": "jul", "pdays": 999, "previous": 0}'
+     -d '{
+           "nr.employed": 5008.7,
+           "job": "admin.",
+           "age": 29,
+           "loan": "no",
+           "cons.conf.idx": -40.0,
+           "campaign": 1,
+           "euribor3m": 0.683,
+           "previous": 3,
+           "cons.price.idx": 93.876,
+           "contact": "cellular",
+           "pdays": 3,
+           "month": "may",
+           "emp.var.rate": -1.8
+         }'
 ```
 
 ## 7. Known limitations / next steps
