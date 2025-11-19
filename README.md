@@ -1,32 +1,29 @@
 # Setting
 
-Don’t you just love getting calls from a call centre? Now imagine working for one — as the manager! Each day you have far too many victims customers to choose from, so you need to prioritise. That’s where we come in.
-
-We provide an API that assigns every customer a “success score” estimating how likely they are to convert a call into a shiny new bank loan (oh — did we forget to mention you also work for a bank?). This helps you direct your valued employees’ efforts where they matter most.
+Who doesn’t love receiving calls from a call center? Now, imagine managing one! With countless ~~victims~~ customers to choose from each day, prioritization is key. That’s where we, as ML Engineers, step in. We provide an API for the manager that assigns each customer a “success score,” estimating how likely they are to convert a call into a shiny new bank loan (oh—did we forget to mention this is for a bank?). This will help the manager to direct their team’s efforts where they matter most.
 
 # 1. Problem Description
 
-The data is from 
+The dataset is sourced from:
+
 >[Moro et al., 2014] S. Moro, P. Cortez and P. Rita. A Data-Driven Approach to Predict the Success of Bank Telemarketing. Decision Support Systems, In press, http://dx.doi.org/10.1016/j.dss.2014.03.001
 
-We use it to select features and train a binary classification model. The Telemarketing team can then query this model to rank customers by likelihood of success. We are not making a hard yes/no prediction — we want a score suitable for ranking.
+I use this data to select features and train a binary classification model. The telemarketing team can query this model to rank customers by their likelihood of success. Instead of making a hard yes/no prediction, it generates a score suitable for ranking.
 
-The workflow looks like this:
+The workflow is as follows:
 ```
-EDA + feature selection 
-→ fine-tuning logistic regression and random forest models
-→ export best model to training script and pickle it
-→ create deployment script
-→ build & publish container
-→ set up cloud interface
+Exploratory Data Analysis (EDA) + Feature Selection
+→ Fine-tuning Logistic Regression and Random Forest Models
+→ Training Script with Best Parameters and Pickling the Model
+→ Creating a Deployment Script
+→ Building and Publishing a Container
+```
 
-```
+**Note**: There is no cloud deployment 🚫.
 
 # 2. Data Description
 
-All data is in 📁 `data`.
-
-An excerpt from `data/bank-additional-names.txt` provides short descriptions of the 20 features:
+The telemarketing data is located in the `data` folder. The file `data/bank-additional-names.txt` provides descriptions of the 20 features. Here is an overview:
 
 - **Bank Client Data**:
 
@@ -61,22 +58,18 @@ An excerpt from `data/bank-additional-names.txt` provides short descriptions of 
     19. euribor3m: euribor 3 month rate - daily indicator (numeric)
     20. nr.employed: number of employees - quarterly indicator (numeric)
 
-> ⚠️ **Important**: For API calls, the “last contact” features (`contact`, `month`, `day_of_week`, `duration`) refer to the call _about to be made_. Since `duration` is obviously unknown before the call, it must be omitted in a predictive model.
+> ⚠️ **Important**: For the API calls, the “last contact” features (`contact`, `month`, `day_of_week`, `duration`) refer to the call _about to be made_. Since `duration` is obviously unknown before the call, it must be omitted in a predictive model.
 
 # 3. EDA Summary
 
-The dataset is generally clean: no missing values and no strange categories.
-
-There is one inconsistency with `pdays`: its value should be `999` whenever `poutcome` is `nonexistent`, but several rows contradict this. This has no practical impact on AUC-ROC performance.
+The dataset is clean, with no missing values or unusual categories. One inconsistency exists with `pdays`: its value should be `999` whenever `poutcome` is `"nonexistent"`, but some rows contradict this. However, this does not significantly impact model performance.
 
 # 4. Modelling Approach & Metrics
 
-The API will be used to produce a ranking for the clients. Thus we take the [average precision](https://en.wikipedia.org/w/index.php?title=Information_retrieval&oldid=793358396#Average_precision) as a metric to compare and fine-tune the models.
+The API ranks clients, so we use [average precision](https://en.wikipedia.org/w/index.php?title=Information_retrieval&oldid=793358396#Average_precision) as the primary metric to compare and fine-tune models.
 
 We consider logistic regression and random forest models.
-We fine tune them on a restricted set of features to save some time.
-
-In the endr andom forest wins 👑.
+In the end random forest wins 👑.
 
 # 5. How to run
 
@@ -89,12 +82,12 @@ First, create a virtual environment:
 uv venv
 ```
 
-To run 🗒️ `notebook.ipynb` locally you need to install all dependencies 
+To run 🗒️ `notebook.ipynb` locally, install all dependencies 
 ```bash
 uv sync
 ```
 
-(I run Jupyter notebooks locally in VS Code and simply select the .venv Python kernel. I don't know about other setups.)
+_Note_: I run Jupyter notebooks locally in VS Code using the .venv Python kernel. Other setups may vary.
 
 
 The rest of these commands don't need an explicit `uv sync`.
@@ -103,8 +96,7 @@ The rest of these commands don't need an explicit `uv sync`.
 ```bash
 uv run train_pipeline.py
 ```
-This produces a pickled model: `pipeline_v1.bin`  
-(already included in the repo, so re-training is not required for deployment).
+This generates a pickled model: pipeline_v1.bin (already included in the repository, so retraining is not required for deployment).
 
 ### Running the Server Locally
 ```bash
@@ -201,3 +193,6 @@ curl -X POST "http://localhost:9696/predict" \
 ```
 
 ## 7. Known limitations / next steps
+
+- Using a more tailored metric, such as a cost-reward metric or Precision@k
+- Explore a wider range of models
