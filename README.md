@@ -69,15 +69,14 @@ The dataset is generally clean: no missing values and no strange categories.
 
 There is one inconsistency with `pdays`: its value should be `999` whenever `poutcome` is `nonexistent`, but several rows contradict this. This has no practical impact on AUC-ROC performance.
 
-After a greedy feature-removal process, we retain the following seven features for training:
-`cons.price.idx`, `contact`, `emp.var.rate`, `euribor3m`, `month`, `pdays`, `previous`.
-
 # 4. Modelling Approach & Metrics
 
-We keep the metric simple (KISS!) and use AUC-ROC to compare model performance.
+The API will be used to produce a ranking for the clients. Thus we take the [average precision](https://en.wikipedia.org/w/index.php?title=Information_retrieval&oldid=793358396#Average_precision) as a metric to compare and fine-tune the models.
 
-We fine-tune both logistic regression and random forest models.
-Random forest wins.
+We consider logistic regression and random forest models.
+We fine tune them on a restricted set of features to save some time.
+
+In the endr andom forest wins 👑.
 
 # 5. How to run
 
@@ -90,14 +89,15 @@ First, create a virtual environment:
 uv venv
 ```
 
-To run 🗒️ `notebook.ipynb` locally you need to install all dependencies (e.g., for running notebook.ipynb):
-
+To run 🗒️ `notebook.ipynb` locally you need to install all dependencies 
 ```bash
 uv sync
 ```
 
 (I run Jupyter notebooks locally in VS Code and simply select the .venv Python kernel. I don't know about other setups.)
 
+
+The rest of these commands don't need an explicit `uv sync`.
 
 ### Run the final Training
 ```bash
@@ -137,7 +137,7 @@ docker images
 You should see something along these lines:
 ```bash
 REPOSITORY                  TAG     IMAGE ID       CREATED        SIZE
-julxi/ml-zoomcamp-midterm   2025    4fe632388077   6 hours ago    432MB
+julxi/ml-zoomcamp-midterm   2025    4fe632388077   6 hours ago    460MB
 ```
 
 Run the container:
@@ -161,19 +161,17 @@ curl -X GET "http://localhost:8000/health"
 curl -X POST "http://localhost:8000/predict" \
      -H "Content-Type: application/json" \
      -d '{
-           "nr.employed": 5008.7,
-           "job": "admin.",
-           "age": 29,
-           "loan": "no",
-           "cons.conf.idx": -40.0,
+           "age": 58,
+           "pdays": 6,
+           "default": "unknown",
            "campaign": 1,
-           "euribor3m": 0.683,
-           "previous": 3,
-           "cons.price.idx": 93.876,
+           "euribor3m": 4.076,
            "contact": "cellular",
-           "pdays": 3,
-           "month": "may",
-           "emp.var.rate": -1.8
+           "day_of_week": "thu",
+           "month": "nov",
+           "cons.price.idx": 93.2,
+           "poutcome": "success",
+           "emp.var.rate": -0.1
          }'
 ```
 
@@ -188,19 +186,17 @@ curl -X GET "http://localhost:9696/health"
 curl -X POST "http://localhost:9696/predict" \
      -H "Content-Type: application/json" \
      -d '{
-           "nr.employed": 5008.7,
-           "job": "admin.",
-           "age": 29,
-           "loan": "no",
-           "cons.conf.idx": -40.0,
+           "age": 58,
+           "pdays": 6,
+           "default": "unknown",
            "campaign": 1,
-           "euribor3m": 0.683,
-           "previous": 3,
-           "cons.price.idx": 93.876,
+           "euribor3m": 4.076,
            "contact": "cellular",
-           "pdays": 3,
-           "month": "may",
-           "emp.var.rate": -1.8
+           "day_of_week": "thu",
+           "month": "nov",
+           "cons.price.idx": 93.2,
+           "poutcome": "success",
+           "emp.var.rate": -0.1
          }'
 ```
 
