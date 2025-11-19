@@ -1,6 +1,6 @@
 # Setting
 
-Who doesn’t love receiving calls from a call center? Now, imagine managing one! With countless ~~victims~~ customers to choose from each day, prioritization is key. That’s where we, as ML Engineers, step in. We provide an API for the manager that assigns each customer a “success score,” estimating how likely they are to convert a call into a shiny new bank loan (oh—did we forget to mention this is for a bank?). This will help the manager to direct their team’s efforts where they matter most.
+Who doesn’t love receiving calls from a call center? Now, imagine managing one! With countless ~~victims~~ customers to choose from each day, prioritization is key. That’s where we, as ML Engineers, step in. We provide an API for the manager that assigns each customer a “success score,” estimating how likely they are to convert a call into a shiny new bank loan (oh—did I forget to mention this is for a bank?). This will help the manager to direct their team’s efforts where they matter most.
 
 # 1. Problem Description
 
@@ -129,7 +129,7 @@ docker images
 You should see something along these lines:
 ```bash
 REPOSITORY                  TAG     IMAGE ID       CREATED        SIZE
-julxi/ml-zoomcamp-midterm   2025    4fe632388077   6 hours ago    460MB
+julxi/ml-zoomcamp-midterm   2025    4fe632388077   6 hours ago    520MB
 ```
 
 Run the container:
